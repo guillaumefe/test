@@ -1,1 +1,120 @@
-PROFILE TODO
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <style>
+        .popup-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        .popup-content {
+            background-color: white;
+            width: 90%;
+            max-width: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .swiper-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .swiper-slide {
+            width: 100%;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+            }
+            .swiper-container {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+<nav class="bg-blue-500 p-4">
+    <div class="container mx-auto flex justify-between items-center">
+        <a href="#" class="text-white text-xl font-semibold">User Profile</a>
+        <ul class="flex space-x-4">
+            <li><a href="home.html" class="text-white">Home</a></li>
+			<li><a href="profile.html" class="text-white">Profile</a></li>
+            <li><a href="settings.html" class="text-white">Settings</a></li>
+            <li><a href="#" class="text-white">Logout</a></li>
+        </ul>
+    </div>
+</nav>
+
+<main class="container mx-auto mt-6 p-4">
+    <h1 class="text-2xl font-semibold mb-4">User Profile</h1>
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-6 mx-auto max-w-[90%]">
+        <h2 class="text-xl font-semibold mb-2">Profile Information</h2>
+        <p id="name" class="mb-2"><strong>Name:</strong> Loading...</p>
+        <p id="email" class="mb-2"><strong>Email:</strong> Loading...</p>
+        <p id="phone" class="mb-2"><strong>Phone:</strong> Loading...</p>
+        <p id="address" class="mb-2"><strong>Address:</strong> Loading...</p>
+    </div>
+    <div class="bg-white p-6 rounded-lg shadow-lg mb-6 mx-auto max-w-[90%]">
+        <h2 class="text-xl font-semibold mb-2">Pets Information</h2>
+        <ul id="petsList" class="mb-2">
+            <li>Loading...</li>
+        </ul>
+    </div>
+</main>
+
+<script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+<script>
+  var firebaseConfig = {
+    apiKey: "AIzaSyCtsosz8MLhEcCksYZoloo6VKDMvBj5iRE",
+    authDomain: "fawnr-f4340.firebaseapp.com",
+    projectId: "fawnr-f4340",
+    storageBucket: "fawnr-f4340.appspot.com",
+    messagingSenderId: "180905515527",
+    databaseURL: "https://fawnr-f4340-default-rtdb.europe-west1.firebasedatabase.app/",
+    appId: "1:180905515527:web:338da9ec2856ffed79a8a2"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var database = firebase.database();
+  var userId = "YOUR_USER_ID";
+
+  database.ref('users/' + userId).once('value').then(function(snapshot) {
+    document.getElementById('name').innerHTML = "<strong>Name:</strong> " + snapshot.val().name;
+    document.getElementById('email').innerHTML = "<strong>Email:</strong> " + snapshot.val().email;
+    document.getElementById('phone').innerHTML = "<strong>Phone:</strong> " + snapshot.val().phone;
+    document.getElementById('address').innerHTML = "<strong>Address:</strong> " + snapshot.val().address;
+  });
+
+  database.ref('users/' + userId + '/pets').once('value').then(function(snapshot) {
+    var petsList = document.getElementById('petsList');
+    petsList.innerHTML = "";
+    snapshot.forEach(function(childSnapshot) {
+      var li = document.createElement("li");
+      li.textContent = childSnapshot.val().name + " - " + childSnapshot.val().type;
+      petsList.appendChild(li);
+    });
+  });
+</script>
+</body>
+</html>
