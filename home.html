@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <style>
+        .swiper-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .swiper-slide {
+            width: 100%;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+            }
+            .swiper-container {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-500 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="#" class="text-white text-xl font-semibold">Home</a>
+            <ul class="flex space-x-4">
+                <li><a href="/profile.html" class="text-white">Profile</a></li>
+                <li><a href="/settings.html" class="text-white">Settings</a></li>
+                <li><a href="#" class="text-white">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <main class="container mx-auto mt-6 p-4">
+        <h1 class="text-2xl font-semibold mb-4">Welcome to Your Home</h1>
+        <div class="bg-white p-6 rounded-lg shadow-lg mx-auto max-w-[90%]">
+            <h2 class="text-xl font-semibold mb-2">Select Your Animal</h2>
+            <select id="animalSelector" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <!-- Les animaux de l'utilisateur seront ajoutés ici -->
+            </select>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-lg mt-6 mx-auto max-w-[90%]">
+            <h2 class="text-xl font-semibold mb-2">Profiles of Other Animals</h2>
+            <div class="swiper-container">
+                <div class="swiper-wrapper" id="otherAnimalProfiles">
+                    <!-- Les profils d'autres animaux seront ajoutés ici -->
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+        </div>
+    </main>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+    <script>
+        var firebaseConfig = {
+		  apiKey: "AIzaSyCtsosz8MLhEcCksYZoloo6VKDMvBj5iRE",
+		  authDomain: "fawnr-f4340.firebaseapp.com",
+		  projectId: "fawnr-f4340",
+		  storageBucket: "fawnr-f4340.appspot.com",
+		  messagingSenderId: "180905515527",
+          databaseURL: "https://fawnr-f4340-default-rtdb.europe-west1.firebasedatabase.app/",
+		  appId: "1:180905515527:web:338da9ec2856ffed79a8a2"
+        };
+        firebase.initializeApp(firebaseConfig);
+
+        var database = firebase.database();
+        var userId = "YOUR_USER_ID";
+
+        function loadAnimalList() {
+            var animalSelector = document.getElementById('animalSelector');
+            animalSelector.innerHTML = "";
+
+            database.ref('users/' + userId + '/animals').once('value', function (snapshot) {
+                snapshot.forEach(function (childSnapshot) {
+                    var animal = childSnapshot.val();
+                    var animalId = childSnapshot.key;
+
+                    var option = document.createElement('option');
+                    option.value = animalId;
+                    option.textContent = animal.name;
+
+                    animalSelector.appendChild(option);
+                });
+
+                animalSelector.addEventListener('change', function () {
+                    var selectedAnimalId = animalSelector.value;
+                    loadOtherAnimalProfiles(selectedAnimalId);
+                });
+
+                var defaultAnimalId = animalSelector.value;
+                loadOtherAnimalProfiles(defaultAnimalId);
+            });
+        }
+        loadAnimalList();
+
+        var swiper = new Swiper('.swiper-container', {
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            slidesPerView: 1,
+            spaceBetween: 10,
+        });
+
+        function loadOtherAnimalProfiles(selectedAnimalId) {
+            var otherAnimalProfiles = document.getElementById('otherAnimalProfiles');
+            otherAnimalProfiles.innerHTML = "";
+
+            database.ref('users').once('value', function (snapshot) {
+                snapshot.forEach(function (userSnapshot) {
+                    var user = userSnapshot.val();
+                    var userId = userSnapshot.key;
+
+                    if (userId !== "YOUR_USER_ID") {
+                        var animals = user.animals || {};
+                        var animal = animals[selectedAnimalId];
+
+                        if (animal) {
+                            var animalElement = document.createElement('div');
+                            animalElement.className = 'swiper-slide';
+                            animalElement.innerHTML = `
+                                <div class="bg-white p-6 rounded-lg shadow-lg mb-4">
+                                    <h2 class="text-xl font-semibold mb-2">${animal.name}</h2>
+                                    <p>${animal.description}</p>
+                                </div>
+                            `;
+                            otherAnimalProfiles.appendChild(animalElement);
+                        }
+                    }
+                });
+                swiper.update();
+            });
+        }
+    </script>
+</body>
+</html>

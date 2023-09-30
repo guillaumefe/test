@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PawMate: Find Your Pet's Perfect Playmate!</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #87CEEB;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            font-size: 3em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 2px #333;
+        }
+        p {
+            max-width: 600px;
+            text-align: center;
+            margin-bottom: 40px;
+            font-size: 1.2em;
+        }
+        button {
+            background-color: #FF6347;
+            color: white;
+            padding: 15px 32px;
+            margin: 10px;
+            text-align: center;
+            font-size: 16px;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.5s;
+        }
+        button:hover {
+            background-color: #FF4500;
+        }
+        .paw {
+            position: relative;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: #FF6347;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .toe {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #FF6347;
+        }
+        .toe:nth-child(1) {
+            top: 0;
+            left: 20px;
+        }
+        .toe:nth-child(2) {
+            top: 20px;
+            left: 0;
+        }
+        .toe:nth-child(3) {
+            top: 20px;
+            right: 0;
+        }
+        .toe:nth-child(4) {
+            top: 60px;
+            left: 20px;
+        }
+        @keyframes jump {
+            0% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+            100% {
+                transform: translateY(0);
+            }
+        }
+        .paw {
+            animation: jump 1s infinite;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #f4f4f4;
+            padding: 20px;
+            border-radius: 5px;
+            width: 300px;
+            text-align: center;
+            color: black;
+        }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+    <script>
+        const firebaseConfig = {
+		  apiKey: "AIzaSyCtsosz8MLhEcCksYZoloo6VKDMvBj5iRE",
+		  authDomain: "fawnr-f4340.firebaseapp.com",
+		  projectId: "fawnr-f4340",
+		  storageBucket: "fawnr-f4340.appspot.com",
+		  messagingSenderId: "180905515527",
+		  appId: "1:180905515527:web:338da9ec2856ffed79a8a2"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+
+        function openModal(provider) {
+            document.getElementById('loginProvider').textContent = provider;
+            document.getElementById('loginModal').style.display = 'flex';
+            document.getElementById('signupForm').style.display = 'none';
+            document.getElementById('signinForm').style.display = 'none';
+            if (provider === 'Sign Up') {
+                document.getElementById('signupForm').style.display = 'block';
+            } else if (provider === 'Sign In') {
+                document.getElementById('signinForm').style.display = 'block';
+            }
+        }
+
+		function signUp() {
+			var email = document.getElementById('signupEmail').value;
+			var password = document.getElementById('signupPassword').value;
+			firebase.auth().createUserWithEmailAndPassword(email, password)
+				.then((userCredential) => {
+					var user = userCredential.user;
+					console.log('Signed up as:', user.email);
+
+					// Redirigez l'utilisateur vers la page de tableau de bord après l'inscription réussie.
+					window.location.href = 'settings.html';
+				})
+				.catch((error) => {
+					var errorMessage = error.message;
+					console.error('Error:', errorMessage);
+				});
+		}
+
+		function signIn() {
+			var email = document.getElementById('signinEmail').value;
+			var password = document.getElementById('signinPassword').value;
+			firebase.auth().signInWithEmailAndPassword(email, password)
+				.then((userCredential) => {
+					var user = userCredential.user;
+					console.log('Signed in as:', user.email);
+
+					// Redirigez l'utilisateur vers la page de tableau de bord après la connexion réussie.
+					window.location.href = 'home.html';
+				})
+				.catch((error) => {
+					var errorMessage = error.message;
+					console.error('Error:', errorMessage);
+				});
+		}
+
+    </script>
+</head>
+<body>
+    <div class="paw">
+        <div class="toe"></div>
+        <div class="toe"></div>
+        <div class="toe"></div>
+        <div class="toe"></div>
+    </div>
+    <h1>Welcome to PawMate!</h1>
+    <p>Find the perfect playmate for your pet and connect with other pet owners near you.</p>
+    <div class="button-container">
+        <button onclick="openModal('Sign Up')">Sign Up</button>
+        <button onclick="openModal('Sign In')">Sign In</button>
+    </div>
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <h2>Login with <span id="loginProvider"></span></h2>
+            <div id="signupForm" style="display: none;">
+                <input type="email" id="signupEmail" placeholder="Email">
+                <input type="password" id="signupPassword" placeholder="Password">
+                <button onclick="signUp()">Sign Up</button>
+            </div>
+            <div id="signinForm" style="display: none;">
+                <input type="email" id="signinEmail" placeholder="Email">
+                <input type="password" id="signinPassword" placeholder="Password">
+                <button onclick="signIn()">Sign In</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

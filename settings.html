@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <style>
+        .popup-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            z-index: 9999;
+        }
+
+        .popup-content {
+            background-color: white;
+            width: 90%;
+            max-width: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .swiper-container {
+            width: 100%;
+            max-width: 100%;
+            margin: 0 auto;
+            overflow: hidden;
+        }
+
+        .swiper-slide {
+            width: 100%;
+            text-align: center;
+        }
+
+        @media (min-width: 768px) {
+            .container {
+                max-width: 768px;
+            }
+            .swiper-container {
+                max-width: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <nav class="bg-blue-500 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+			<a href="#" class="text-white text-xl font-semibold">Settings</a>
+            <ul class="flex space-x-4">
+                <li><a href="/home.html" class="text-white">Home</a></li>
+                <li><a href="/profile.html" class="text-white">Profile</a></li>
+                <li><a href="#" class="text-white">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    <main class="container mx-auto mt-6 p-4">
+        <h1 class="text-2xl font-semibold mb-4">Settings</h1>
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6 mx-auto max-w-[90%]">
+            <h2 class="text-xl font-semibold mb-2">User Profile</h2>
+            <form id="userProfileForm" class="mt-4">
+                <label for="firstName" class="block text-gray-700">First Name:</label>
+                <input type="text" id="firstName" name="firstName" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <label for="lastName" class="block mt-2 text-gray-700">Last Name:</label>
+                <input type="text" id="lastName" name="lastName" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <label for="address" class="block mt-2 text-gray-700">Address:</label>
+                <input type="text" id="address" name="address" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <label for="phoneNumber" class="block mt-2 text-gray-700">Phone Number:</label>
+                <input type="text" id="phoneNumber" name="phoneNumber" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <label for="email" class="block mt-2 text-gray-700">Email:</label>
+                <input type="email" id="email" name="email" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <button type="submit" class="mt-4 bg-blue-500 text-white px-2 py-1 rounded-md">Update Profile</button>
+            </form>
+        </div>
+        <div class="bg-white p-6 rounded-lg shadow-lg mb-6 mx-auto max-w-[90%]">
+            <h2 class="text-xl font-semibold mb-2">Animal List</h2>
+            <div class="swiper-container">
+                <div class="swiper-wrapper" id="animalList">
+                    <!-- Les animaux seront ajoutés ici -->
+                </div>
+                <div class="swiper-button-next"></div>
+                <div class="swiper-button-prev"></div>
+            </div>
+            <button id="openCreateAnimalPopup" class="bg-blue-500 text-white px-4 py-2 mt-4 rounded-lg">Create Animal</button>
+        </div>
+    </main>
+    <div class="popup-container" id="createAnimalPopup">
+        <div class="popup-content bg-white">
+            <h2 class="text-xl font-semibold mb-2">Create Animal Profile</h2>
+            <form id="animalProfileForm" class="mt-4">
+                <label for="animalName" class="block text-gray-700">Animal Name:</label>
+                <input type="text" id="animalName" name="animalName" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200">
+                <label for="animalDescription" class="block mt-2 text-gray-700">Animal Description:</label>
+                <textarea id="animalDescription" name="animalDescription" class="w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring focus:ring-blue-200"></textarea>
+                <button type="submit" class="mt-4 bg-blue-500 text-white px-2 py-1 rounded-md">Create Animal</button>
+                <button id="closeCreateAnimalPopup" type="button" class="mt-4 bg-red-500 text-white px-2 py-1 rounded-md">Cancel</button>
+            </form>
+        </div>
+    </div>
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.6.5/firebase-database.js"></script>
+    <script>
+        var firebaseConfig = {
+		  apiKey: "AIzaSyCtsosz8MLhEcCksYZoloo6VKDMvBj5iRE",
+		  authDomain: "fawnr-f4340.firebaseapp.com",
+		  projectId: "fawnr-f4340",
+		  storageBucket: "fawnr-f4340.appspot.com",
+		  messagingSenderId: "180905515527",
+          databaseURL: "https://fawnr-f4340-default-rtdb.europe-west1.firebasedatabase.app/",
+		  appId: "1:180905515527:web:338da9ec2856ffed79a8a2"
+        };
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        var database = firebase.database();
+        var userId = "YOUR_USER_ID"; // Remplacez par l'ID de l'utilisateur actuel
+
+        // Mettre à jour le formulaire avec les informations de l'utilisateur actuel
+        function updateUserProfileForm() {
+            var userProfileForm = document.getElementById('userProfileForm');
+            database.ref('users/' + userId).once('value', function (snapshot) {
+                var user = snapshot.val();
+                if (user) {
+                    userProfileForm.firstName.value = user.firstName || '';
+                    userProfileForm.lastName.value = user.lastName || '';
+                    userProfileForm.address.value = user.address || '';
+                    userProfileForm.phoneNumber.value = user.phoneNumber || '';
+                    userProfileForm.email.value = user.email || '';
+                }
+            });
+        }
+
+        // Charger les informations de l'utilisateur actuel
+        updateUserProfileForm();
+
+        // Mettre à jour le profil utilisateur
+        userProfileForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+            var firstName = userProfileForm.firstName.value;
+            var lastName = userProfileForm.lastName.value;
+            var address = userProfileForm.address.value;
+            var phoneNumber = userProfileForm.phoneNumber.value;
+            var email = userProfileForm.email.value;
+
+            var userProfileData = {
+                firstName: firstName,
+                lastName: lastName,
+                address: address,
+                phoneNumber: phoneNumber,
+                email: email
+            };
+
+            database.ref('users/' + userId).update(userProfileData, function (error) {
+                if (error) {
+                    console.error("Erreur lors de la mise à jour du profil utilisateur : " + error);
+                } else {
+                    console.log("Profil utilisateur mis à jour avec succès.");
+                }
+            });
+        });
+
+        var swiper = new Swiper('.swiper-container', {
+            navigation: {
+                nextEl: '.swiper-button-next',
+                prevEl: '.swiper-button-prev',
+            },
+            slidesPerView: 1,
+            spaceBetween: 10,
+        });
+
+        // Fonction pour charger les animaux depuis la base de données
+        function loadAnimals() {
+            var animalList = document.getElementById('animalList');
+            animalList.innerHTML = ""; // Effacer la liste actuelle d'animaux
+            database.ref('users/' + userId + '/animals').once('value', function (snapshot) {
+                snapshot.forEach(function (childSnapshot) {
+                    var animal = childSnapshot.val();
+                    var animalId = childSnapshot.key;
+                    var animalElement = document.createElement('div');
+                    animalElement.className = 'swiper-slide';
+                    animalElement.innerHTML = `
+                        <div class="bg-white p-6 rounded-lg shadow-lg mb-4">
+                            <h2 class="text-xl font-semibold mb-2">${animal.name}</h2>
+                            <p>${animal.description}</p>
+                            <button class="bg-blue-500 text-white px-2 py-1 rounded-md" onclick="editAnimal('${animalId}')">Update</button>
+                            <button class="bg-red-500 text-white px-2 py-1 rounded-md" onclick="deleteAnimal('${animalId}')">Delete</button>
+                        </div>
+                    `;
+                    animalList.appendChild(animalElement);
+                });
+                swiper.update(); // Mettre à jour le Swiper après avoir ajouté de nouveaux éléments
+            });
+        }
+
+        // Charger les animaux initialement
+        loadAnimals();
+
+        // Fonction pour ajouter un animal dans la base de données
+        document.getElementById('animalProfileForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            var animalName = document.getElementById('animalName').value;
+            var animalDescription = document.getElementById('animalDescription').value;
+            var newAnimalRef = database.ref('users/' + userId + '/animals').push();
+            newAnimalRef.set({
+                name: animalName,
+                description: animalDescription
+            }, function (error) {
+                if (error) {
+                    console.error("Erreur lors de la création de l'animal : " + error);
+                } else {
+                    // Réinitialiser le formulaire et recharger la liste des animaux
+                    document.getElementById('animalName').value = '';
+                    document.getElementById('animalDescription').value = '';
+                    document.getElementById('createAnimalPopup').style.display = 'none';
+                    loadAnimals();
+                }
+            });
+        });
+
+        // Fonction pour supprimer un animal de la base de données
+        function deleteAnimal(animalId) {
+            if (confirm("Voulez-vous vraiment supprimer cet animal?")) {
+                database.ref('users/' + userId + '/animals/' + animalId).remove().then(function () {
+                    // Réactualiser la liste des animaux après la suppression
+                    loadAnimals();
+                }).catch(function (error) {
+                    console.error("Erreur lors de la suppression de l'animal : " + error);
+                });
+            }
+        }
+
+        // Fonction pour éditer un animal
+        function editAnimal(animalId) {
+            var newName = prompt("Nouveau nom de l'animal :");
+            if (newName !== null && newName.trim() !== "") {
+                var updates = {};
+                updates['users/' + userId + '/animals/' + animalId + '/name'] = newName;
+                database.ref().update(updates).then(function () {
+                    // Réactualiser la liste des animaux après la mise à jour
+                    loadAnimals();
+                }).catch(function (error) {
+                    console.error("Erreur lors de la mise à jour de l'animal : " + error);
+                });
+            }
+        }
+		
+		document.getElementById('openCreateAnimalPopup').addEventListener('click', function() {
+			document.getElementById('createAnimalPopup').style.display = 'block';
+		});
+
+		document.getElementById('closeCreateAnimalPopup').addEventListener('click', function() {
+			document.getElementById('createAnimalPopup').style.display = 'none';
+		});
+
+    </script>
+</body>
+</html>
